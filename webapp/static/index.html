@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Football Analytics Calculators</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Football Analytics Calculators</h1>
+    <p>Interactive front end for the regression &amp; GLM models from <em>Football Analytics with Python and R</em> (Ch. 3-6), fit on real play-by-play data via <code>nfl_data_py</code>.</p>
+  </header>
+
+  <nav class="tabs">
+    <button data-tab="ryoe-simple" class="active">RYOE (simple)</button>
+    <button data-tab="ryoe-multi">RYOE (multiple)</button>
+    <button data-tab="completion-simple">Completion % (simple)</button>
+    <button data-tab="completion-multi">Completion % (multiple)</button>
+    <button data-tab="pass-td">Passing TDs</button>
+    <button data-tab="model-info">Model info</button>
+  </nav>
+
+  <section id="ryoe-simple" class="tab-panel">
+    <div class="panel">
+      <h2>Chapter 3 &mdash; Rushing Yards Over Expected (simple)</h2>
+      <p class="desc">Model: <code>rushing_yards ~ 1 + ydstogo</code>. Enter yards to go and get the expected rushing yards on that play.</p>
+      <div class="field-grid">
+        <div class="field">
+          <label for="rs-ydstogo">Yards to go</label>
+          <input id="rs-ydstogo" type="number" value="10" min="1" max="30" step="1" />
+        </div>
+      </div>
+      <button class="run" data-endpoint="/api/ryoe-simple" data-result="rs-result">Calculate</button>
+      <div class="result" id="rs-result"></div>
+    </div>
+  </section>
+
+  <section id="ryoe-multi" class="tab-panel" hidden>
+    <div class="panel">
+      <h2>Chapter 4 &mdash; Rushing Yards Over Expected (multiple regression)</h2>
+      <p class="desc">Model: <code>rushing_yards ~ down + ydstogo + down:ydstogo + yardline_100 + run_location + score_differential</code>. Optionally add the actual yards gained to compute RYOE for that play.</p>
+      <div class="field-grid">
+        <div class="field">
+          <label for="rm-down">Down</label>
+          <select id="rm-down">
+            <option value="1">1st</option>
+            <option value="2">2nd</option>
+            <option value="3">3rd</option>
+            <option value="4">4th</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="rm-ydstogo">Yards to go</label>
+          <input id="rm-ydstogo" type="number" value="10" min="1" max="30" step="1" />
+        </div>
+        <div class="field">
+          <label for="rm-yardline100">Yards from opp. goal line</label>
+          <input id="rm-yardline100" type="number" value="50" min="1" max="99" step="1" />
+        </div>
+        <div class="field">
+          <label for="rm-location">Run location</label>
+          <select id="rm-location">
+            <option value="left">Left</option>
+            <option value="middle">Middle</option>
+            <option value="right">Right</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="rm-scorediff">Score differential (offense - defense)</label>
+          <input id="rm-scorediff" type="number" value="0" min="-49" max="49" step="1" />
+        </div>
+        <div class="field">
+          <label for="rm-actual">Actual yards gained (optional)</label>
+          <input id="rm-actual" type="number" step="1" placeholder="leave blank to skip" />
+        </div>
+      </div>
+      <button class="run" data-endpoint="/api/ryoe-multi" data-result="rm-result">Calculate</button>
+      <div class="result" id="rm-result"></div>
+    </div>
+  </section>
+
+  <section id="completion-simple" class="tab-panel" hidden>
+    <div class="panel">
+      <h2>Chapter 5 &mdash; Completion Probability (simple)</h2>
+      <p class="desc">Model: <code>complete_pass ~ air_yards</code> (logistic/Binomial GLM).</p>
+      <div class="field-grid">
+        <div class="field">
+          <label for="cs-airyards">Air yards</label>
+          <input id="cs-airyards" type="number" value="8" min="-20" max="65" step="1" />
+        </div>
+      </div>
+      <button class="run" data-endpoint="/api/completion-simple" data-result="cs-result">Calculate</button>
+      <div class="result" id="cs-result"></div>
+    </div>
+  </section>
+
+  <section id="completion-multi" class="tab-panel" hidden>
+    <div class="panel">
+      <h2>Chapter 5 &mdash; Completion Probability (multiple, with CPOE)</h2>
+      <p class="desc">Model: <code>complete_pass ~ down * ydstogo + yardline_100 + air_yards + pass_location + qb_hit</code>. Optionally mark whether the pass was actually completed to compute CPOE.</p>
+      <div class="field-grid">
+        <div class="field">
+          <label for="cm-down">Down</label>
+          <select id="cm-down">
+            <option value="1">1st</option>
+            <option value="2">2nd</option>
+            <option value="3">3rd</option>
+            <option value="4">4th</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="cm-ydstogo">Yards to go</label>
+          <input id="cm-ydstogo" type="number" value="10" min="1" max="30" step="1" />
+        </div>
+        <div class="field">
+          <label for="cm-yardline100">Yards from opp. goal line</label>
+          <input id="cm-yardline100" type="number" value="50" min="1" max="99" step="1" />
+        </div>
+        <div class="field">
+          <label for="cm-airyards">Air yards</label>
+          <input id="cm-airyards" type="number" value="8" min="-20" max="65" step="1" />
+        </div>
+        <div class="field">
+          <label for="cm-location">Pass location</label>
+          <select id="cm-location">
+            <option value="left">Left</option>
+            <option value="middle">Middle</option>
+            <option value="right">Right</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="cm-qbhit">QB hit on the play?</label>
+          <select id="cm-qbhit">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="cm-completed">Actually completed? (optional)</label>
+          <select id="cm-completed">
+            <option value="">Skip</option>
+            <option value="1">Yes</option>
+            <option value="0">No</option>
+          </select>
+        </div>
+      </div>
+      <button class="run" data-endpoint="/api/completion-multi" data-result="cm-result">Calculate</button>
+      <div class="result" id="cm-result"></div>
+    </div>
+  </section>
+
+  <section id="pass-td" class="tab-panel" hidden>
+    <div class="panel">
+      <h2>Chapter 6 &mdash; Passing Touchdown Probabilities</h2>
+      <p class="desc">Model: <code>pass_td_y ~ pass_td_rate + total_line</code> (Poisson GLM), reproducing the book's Mahomes/Super&nbsp;Bowl&nbsp;LVII example. "TD rate" is the QB's trailing average TD passes per game.</p>
+      <div class="field-grid">
+        <div class="field">
+          <label for="pt-rate">QB trailing TD-pass rate (per game)</label>
+          <input id="pt-rate" type="number" value="2.3" min="0" max="6" step="0.1" />
+        </div>
+        <div class="field">
+          <label for="pt-total">Vegas game total (total_line)</label>
+          <input id="pt-total" type="number" value="48.5" min="30" max="65" step="0.5" />
+        </div>
+      </div>
+      <button class="run" data-endpoint="/api/pass-td" data-result="pt-result">Calculate</button>
+      <div class="result" id="pt-result"></div>
+    </div>
+  </section>
+
+  <section id="model-info" class="tab-panel" hidden>
+    <div class="panel">
+      <h2>Fitted model details</h2>
+      <p class="desc">Coefficients and sample sizes for each model, fit once at server startup on 2016&ndash;2022 play-by-play data.</p>
+      <div id="model-info-body">Loading&hellip;</div>
+    </div>
+  </section>
+
+  <p class="status" id="global-status"></p>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

@@ -3,3 +3,7 @@
 *.png
 *.csv
 *~
+.venv/
+__pycache__/
+*.pyc
+data/*.parquet
